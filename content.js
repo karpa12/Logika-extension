@@ -1,4 +1,3 @@
-// --- НАЛАШТУВАННЯ ---
 const CONFIG = {
     red: "244, 91, 91",
     green: "149, 193, 31",
@@ -10,7 +9,6 @@ const CONFIG = {
     }
 };
 
-// --- СТИЛІ (CSS) ---
 const STYLES = `
     .aa-panel { position: fixed; top: 20px; right: 20px; bottom: 20px; width: 300px; background: #fff; box-shadow: -5px 0 20px rgba(0,0,0,0.1); border-radius: 12px; transform: translateX(120%); transition: transform 0.3s; z-index: 9999; display: flex; flex-direction: column; font-family: sans-serif; border: 1px solid #eee; }
     .aa-panel.visible { transform: translateX(0); }
@@ -28,7 +26,6 @@ const STYLES = `
     .aa-highlight-ignored { border: 1px dashed #ccc !important; opacity: 0.6; }
 `;
 
-// --- ГОЛОВНИЙ ОБ'ЄКТ ---
 const App = {
     panel: null,
     list: null,
@@ -36,18 +33,15 @@ const App = {
     ignored: JSON.parse(localStorage.getItem('ignoredStudents_v2') || '[]'),
 
     init() {
-        // 1. Вставка стилів
         const style = document.createElement("style");
         style.innerText = STYLES;
         document.head.appendChild(style);
 
-        // 2. Створення панелі
         this.createPanel();
 
-        // 3. Запуск стеження за змінами на сторінці
         const observer = new MutationObserver(() => {
             clearTimeout(this.timeout);
-            this.timeout = setTimeout(() => this.scan(), 800); // Затримка 0.8с
+            this.timeout = setTimeout(() => this.scan(), 800); 
         });
         observer.observe(document.body, { childList: true, subtree: true });
         
@@ -84,7 +78,6 @@ const App = {
     },
 
     checkDebt(history) {
-        // Прибираємо "майбутні" сірі квадрати з кінця масиву
         while (history.length > 0 && history[history.length - 1] === 'gray') {
             history.pop();
         }
@@ -94,7 +87,6 @@ const App = {
         const prev = history[history.length - 2];
         const prevPrev = history[history.length - 3];
 
-        // Логіка: 2 червоних або Черв-Черв-Зелен
         if (last === 'red' && prev === 'red') return true;
         if (last === 'green' && prev === 'red' && prevPrev === 'red') return true;
         
@@ -102,7 +94,6 @@ const App = {
     },
 
     getName(grid) {
-        // Шукаємо ім'я, піднімаючись вгору по дереву елементів
         let el = grid.parentElement;
         for (let i = 0; i < 8; i++) {
             if (!el) break;
@@ -115,15 +106,13 @@ const App = {
 
     scan() {
         const grids = document.querySelectorAll(CONFIG.selectors.grid);
-        this.list.innerHTML = ""; // Очищаємо список перед оновленням
+        this.list.innerHTML = "";
         let count = 0;
 
         grids.forEach(grid => {
-            // Збираємо кольори
             const cells = Array.from(grid.querySelectorAll(CONFIG.selectors.cell));
             const history = cells.map(c => this.getColor(c));
 
-            // Якщо боргів немає - знімаємо всі позначки
             if (!this.checkDebt(history)) {
                 grid.classList.remove('aa-highlight', 'aa-highlight-ignored');
                 grid.style.border = ""; 
@@ -132,21 +121,18 @@ const App = {
 
             const name = this.getName(grid);
 
-            // Якщо в ігнорі
             if (this.ignored.includes(name)) {
                 grid.classList.remove('aa-highlight');
                 grid.classList.add('aa-highlight-ignored');
                 return;
             }
 
-            // Якщо активний боржник
             count++;
             grid.classList.add('aa-highlight');
             grid.classList.remove('aa-highlight-ignored');
             this.renderCard(name, grid);
         });
 
-        // Оновлюємо лічильник та видимість панелі
         this.panel.querySelector("#aa-title").innerText = `Боржники: ${count}`;
         this.panel.classList.toggle('visible', count > 0);
     },
@@ -162,14 +148,12 @@ const App = {
             </div>
         `;
 
-        // Кнопка "Око"
         card.querySelector('.aa-btn-view').onclick = () => {
             grid.scrollIntoView({ behavior: "smooth", block: "center" });
             grid.style.boxShadow = "0 0 0 6px rgba(24, 144, 255, 0.5)";
             setTimeout(() => grid.style.boxShadow = "", 1000);
         };
 
-        // Кнопка "Виконано"
         card.querySelector('.aa-btn-done').onclick = () => {
             this.ignored.push(name);
             localStorage.setItem('ignoredStudents_v2', JSON.stringify(this.ignored));
@@ -177,7 +161,6 @@ const App = {
             card.remove();
             grid.classList.replace('aa-highlight', 'aa-highlight-ignored');
             
-            // Оновлення лічильника
             const left = this.list.children.length;
             this.panel.querySelector("#aa-title").innerText = `Боржники: ${left}`;
             if (left === 0) this.panel.classList.remove('visible');

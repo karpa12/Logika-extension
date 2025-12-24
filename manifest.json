@@ -1,0 +1,12 @@
+{
+    "manifest_version": 3,
+    "name": "Attendance Checker (Red Square)",
+    "version": "2.3",
+    "permissions": ["activeTab", "scripting"],
+    "content_scripts": [
+      {
+        "matches": ["https://backoffice.logikaschool.com.ua/*"], 
+        "js": ["content.js"]
+      }
+    ]
+  }
